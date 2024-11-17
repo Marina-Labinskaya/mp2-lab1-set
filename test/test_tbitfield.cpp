@@ -2,52 +2,72 @@
 
 #include <gtest.h>
 
+
+
+class TBitField_fix : public ::testing::Test {
+protected:
+    void SetUp() {
+        bf = new TBitField(5);
+        bf->SetBit(1);
+        bf->SetBit(3);
+        bf->SetBit(4);
+        //01011
+
+        bf1 = new TBitField(4);
+        bf2 = new TBitField(5);
+    }
+    void TearDown() {
+        delete bf;
+        delete bf1;
+        delete bf2;
+    }
+    TBitField* bf;
+    TBitField* bf1;
+    TBitField* bf2;
+};
+
+
+
 TEST(TBitField, can_create_bitfield_with_positive_length)
 {
   ASSERT_NO_THROW(TBitField bf(3));
 }
 
-TEST(TBitField, can_get_length)
+TEST_F(TBitField_fix, can_get_length)
 {
-  TBitField bf(3);
-
-  EXPECT_EQ(3, bf.GetLength());
+  EXPECT_EQ(5, bf->GetLength());
 }
 
-TEST(TBitField, new_bitfield_is_set_to_zero)
+TEST_F(TBitField_fix, new_bitfield_is_set_to_zero)
 {
-  TBitField bf(100);
 
   int sum = 0;
-  for (int i = 0; i < bf.GetLength(); i++)
+  for (int i = 0; i < bf->GetLength(); i++)
   {
-    sum += bf.GetBit(i);
+    sum += bf->GetBit(i);
   }
 
-  EXPECT_EQ(0, sum);
+  EXPECT_EQ(3, sum);
 }
 
-TEST(TBitField, can_set_bit)
+TEST_F(TBitField_fix, can_set_bit)
 {
-  TBitField bf(10);
+  EXPECT_EQ(0, bf->GetBit(0));
 
-  EXPECT_EQ(0, bf.GetBit(3));
-
-  bf.SetBit(3);
-  EXPECT_NE(0, bf.GetBit(3));
+  bf->SetBit(0);
+  EXPECT_NE(0, bf->GetBit(0));
 }
 
-TEST(TBitField, can_clear_bit)
+TEST_F(TBitField_fix, can_clear_bit)
 {
-  TBitField bf(10);
 
-  int bitIdx = 3;
+  int bitIdx = 2;
 
-  bf.SetBit(bitIdx);
-  EXPECT_NE(0, bf.GetBit(bitIdx));
+  bf->SetBit(bitIdx);
+  EXPECT_NE(0, bf->GetBit(bitIdx));
 
-  bf.ClrBit(bitIdx);
-  EXPECT_EQ(0, bf.GetBit(bitIdx));
+  bf->ClrBit(bitIdx);
+  EXPECT_EQ(0, bf->GetBit(bitIdx));
 }
 
 TEST(TBitField, throws_when_create_bitfield_with_negative_length)
@@ -55,46 +75,34 @@ TEST(TBitField, throws_when_create_bitfield_with_negative_length)
   ASSERT_ANY_THROW(TBitField bf(-3));
 }
 
-TEST(TBitField, throws_when_set_bit_with_negative_index)
+TEST_F(TBitField_fix, throws_when_set_bit_with_negative_index)
 {
-  TBitField bf(10);
-
-  ASSERT_ANY_THROW(bf.SetBit(-3));
+  ASSERT_ANY_THROW(bf->SetBit(-3));
 }
 
-TEST(TBitField, throws_when_set_bit_with_too_large_index)
+TEST_F(TBitField_fix, throws_when_set_bit_with_too_large_index)
 {
-  TBitField bf(10);
-
-  ASSERT_ANY_THROW(bf.SetBit(11));
+  ASSERT_ANY_THROW(bf->SetBit(5));
 }
 
-TEST(TBitField, throws_when_get_bit_with_negative_index)
+TEST_F(TBitField_fix, throws_when_get_bit_with_negative_index)
 {
-  TBitField bf(10);
-
-  ASSERT_ANY_THROW(bf.GetBit(-3));
+  ASSERT_ANY_THROW(bf->GetBit(-3));
 }
 
-TEST(TBitField, throws_when_get_bit_with_too_large_index)
+TEST_F(TBitField_fix, throws_when_get_bit_with_too_large_index)
 {
-  TBitField bf(10);
-
-  ASSERT_ANY_THROW(bf.GetBit(11));
+  ASSERT_ANY_THROW(bf->GetBit(11));
 }
 
-TEST(TBitField, throws_when_clear_bit_with_negative_index)
+TEST_F(TBitField_fix, throws_when_clear_bit_with_negative_index)
 {
-  TBitField bf(10);
-
-  ASSERT_ANY_THROW(bf.ClrBit(-3));
+  ASSERT_ANY_THROW(bf->ClrBit(-3));
 }
 
-TEST(TBitField, throws_when_clear_bit_with_too_large_index)
+TEST_F(TBitField_fix, throws_when_clear_bit_with_too_large_index)
 {
-  TBitField bf(10);
-
-  ASSERT_ANY_THROW(bf.ClrBit(11));
+  ASSERT_ANY_THROW(bf->ClrBit(5));
 }
 
 TEST(TBitField, can_assign_bitfields_of_equal_size)
@@ -124,31 +132,28 @@ TEST(TBitField, assign_operator_changes_bitfield_size)
   EXPECT_EQ(2, bf2.GetLength());
 }
 
-TEST(TBitField, can_assign_bitfields_of_non_equal_size)
+TEST_F(TBitField_fix, can_assign_bitfields_of_non_equal_size)
 {
-  const int size1 = 2, size2 = 5;
-  TBitField bf1(size1), bf2(size2);
-  for (int i = 0; i < size1; i++)
-  {
-    bf1.SetBit(i);
-  }
-  bf2 = bf1;
+    const int size1 = 4, size2 = 5;
+    for (int i = 0; i < size1; i++)
+    {
+        bf1->SetBit(i);
+    }
+    *bf2 = *bf1;
 
-  EXPECT_NE(0, bf2.GetBit(0));
-  EXPECT_NE(0, bf2.GetBit(1));
+    EXPECT_NE(0, bf2->GetBit(0));
+    EXPECT_NE(0, bf2->GetBit(1));
 }
 
-TEST(TBitField, compare_equal_bitfields_of_equal_size)
-{
-  const int size = 2;
-  TBitField bf1(size), bf2(size);
-  for (int i = 0; i < size; i++)
+TEST_F(TBitField_fix, compare_equal_bitfields_of_equal_size)
+{  
+  for (int i = 0; i < 4; i++)
   {
-    bf1.SetBit(i);
+    bf->SetBit(i);
   }
-  bf2 = bf1;
+  *bf2 = *bf;
 
-  EXPECT_EQ(bf1, bf2);
+  EXPECT_EQ(*bf, *bf2);
 }
 
 TEST(TBitField, or_operator_applied_to_bitfields_of_equal_size)
@@ -170,23 +175,23 @@ TEST(TBitField, or_operator_applied_to_bitfields_of_equal_size)
   EXPECT_EQ(expBf, bf1 | bf2);
 }
 
-TEST(TBitField, or_operator_applied_to_bitfields_of_non_equal_size)
+TEST_F(TBitField_fix, or_operator_applied_to_bitfields_of_non_equal_size)
 {
   const int size1 = 4, size2 = 5;
-  TBitField bf1(size1), bf2(size2), expBf(size2);
+  TBitField expBf(size2);
   // bf1 = 0011
-  bf1.SetBit(2);
-  bf1.SetBit(3);
+  bf1->SetBit(2);
+  bf1->SetBit(3);
   // bf2 = 01010
-  bf2.SetBit(1);
-  bf2.SetBit(3);
+  bf2->SetBit(1);
+  bf2->SetBit(3);
 
   // expBf = 01110
   expBf.SetBit(1);
   expBf.SetBit(2);
   expBf.SetBit(3);
 
-  EXPECT_EQ(expBf, bf1 | bf2);
+  EXPECT_EQ(expBf, *bf1 | *bf2);
 }
 
 TEST(TBitField, and_operator_applied_to_bitfields_of_equal_size)
@@ -206,21 +211,21 @@ TEST(TBitField, and_operator_applied_to_bitfields_of_equal_size)
   EXPECT_EQ(expBf, bf1 & bf2);
 }
 
-TEST(TBitField, and_operator_applied_to_bitfields_of_non_equal_size)
+TEST_F(TBitField_fix, and_operator_applied_to_bitfields_of_non_equal_size)
 {
   const int size1 = 4, size2 = 5;
-  TBitField bf1(size1), bf2(size2), expBf(size2);
+  TBitField expBf(size2);
   // bf1 = 0011
-  bf1.SetBit(2);
-  bf1.SetBit(3);
+  bf1->SetBit(2);
+  bf1->SetBit(3);
   // bf2 = 01010
-  bf2.SetBit(1);
-  bf2.SetBit(3);
+  bf2->SetBit(1);
+  bf2->SetBit(3);
 
   // expBf = 00010
   expBf.SetBit(3);
 
-  EXPECT_EQ(expBf, bf1 & bf2);
+  EXPECT_EQ(expBf, *bf1 & *bf2);
 }
 
 TEST(TBitField, can_invert_bitfield)
