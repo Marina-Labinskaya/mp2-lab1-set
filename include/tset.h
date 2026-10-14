@@ -32,7 +32,7 @@ public:
   TSet operator+ (const int Elem); // объединение с элементом
                                    // элемент должен быть из того же универса
   TSet operator- (const int Elem); // разность с элементом
-                                   // элемент должен быть из того же универса
+  TSet operator-(const TSet& s);           // элемент должен быть из того же универса
   TSet operator+ (const TSet &s);  // объединение
   TSet operator* (const TSet &s);  // пересечение
   TSet operator~ (void);           // дополнение
