@@ -309,3 +309,70 @@ TEST(TBitField, bitfields_with_different_bits_are_not_equal)
 
   EXPECT_NE(bf1, bf2);
 }
+
+// my tests
+
+TEST(TBitField, copy_is_independent_and_assignment_returns_self) {
+  TBitField a(70); a.SetBit(69);
+  TBitField b(a);
+  EXPECT_EQ(a, b);
+  b.ClrBit(69);
+  EXPECT_EQ(1, a.GetBit(69));
+  EXPECT_EQ(&a, &(a = a));
+  EXPECT_EQ(1, a.GetBit(69));
+  EXPECT_EQ(&b, &(b = a));
+  b.ClrBit(69);
+  EXPECT_EQ(1, a.GetBit(69));
+}
+
+TEST(TBitField, double_inversion_returns_the_original) {
+  TBitField a(38);
+  TBitField b(38);
+  a.SetBit(15);
+  b = ~a;
+  b = ~b;
+  EXPECT_EQ(b, a);
+  EXPECT_EQ(a, ~~a);
+}
+
+TEST(TBitField, repeated_clear_and_chained_operations) {
+  TBitField a(4), b(4), c(4);
+  a.SetBit(0); b.SetBit(1); c.SetBit(2);
+  TBitField result = a | b | c;
+  EXPECT_EQ(1, result.GetBit(0)); EXPECT_EQ(1, result.GetBit(1)); EXPECT_EQ(1, result.GetBit(2));
+  a.ClrBit(0); a.ClrBit(0); EXPECT_EQ(0, a.GetBit(0));
+}
+
+TEST(TBitFieldExtra, can_create_and_invert_empty_field_and_cant_get_bit_from_empty_field)
+{
+  TBitField empty(0);
+  EXPECT_EQ(0, (~empty).GetLength());
+  EXPECT_EQ(empty, ~empty);
+  EXPECT_ANY_THROW(empty.GetBit(0));
+}
+
+
+TEST(TBitFieldExtra, sample_prime_numbers) {
+  int n, m, k;
+  n = 30;
+  TBitField s(n + 1);
+  // заполнение множества
+  for (m = 2; m <= n; m++)
+    s.SetBit(m);
+  // проверка до sqrt(n) и удаление кратных
+  for (m = 2; m * m <= n; m++)
+    // если m в s, удаление кратных
+      if (s.GetBit(m))
+        for (k = 2 * m; k <= n; k += m)
+          if (s.GetBit(k))
+            s.ClrBit(k);
+  // оставшиеся в s элементы - простые числа
+
+  TBitField expected(n+1);
+  int primes[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+
+  for (int i = 0; i < 10; i++)
+    expected.SetBit(primes[i]);
+
+  EXPECT_EQ(expected, s);
+}

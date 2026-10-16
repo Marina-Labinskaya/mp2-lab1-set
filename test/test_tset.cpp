@@ -295,3 +295,64 @@ TEST(TSet, check_negation_operator)
 
   EXPECT_EQ(expSet, set1);
 }
+
+// my tests
+
+TEST(TSet, chain_combination_and_empty_complement) {
+  TSet a(4), b(4), c(4); a.InsElem(0); b.InsElem(1); c.InsElem(2);
+  TSet result = a + b + c;
+  EXPECT_EQ(1, result.IsMember(0)); EXPECT_EQ(1, result.IsMember(1)); EXPECT_EQ(1, result.IsMember(2)); EXPECT_EQ(0, result.IsMember(3));
+  TSet empty(0);
+  TSet result1 = empty + empty;
+  EXPECT_EQ(empty, result1);
+  EXPECT_EQ(empty, ~empty);
+}
+
+TEST(TSet, element_operations_preserve_source) {
+  TSet a(5); a.InsElem(2);
+  TSet b = a - 2;
+  EXPECT_EQ(0, b.IsMember(2));
+  EXPECT_EQ(1, a.IsMember(2));
+  TSet c = a + 4;
+  EXPECT_EQ(1, c.IsMember(4));
+  EXPECT_EQ(0, a.IsMember(4));
+}
+
+TEST(TSet, chain_intersection_and_empty_complement) {
+  TSet a(5), b(5), c(5);
+  a.InsElem(0); a.InsElem(1); a.InsElem(3); a.InsElem(4);
+  b.InsElem(1); b.InsElem(2); b.InsElem(3); b.InsElem(4);
+  c.InsElem(2); c.InsElem(4);
+  TSet result = a * b * c;
+  TSet expected(5); expected.InsElem(4);
+  EXPECT_EQ(result, expected);
+  TSet empty(0);
+  TSet result1 = empty * empty;
+  EXPECT_EQ(empty, result1);
+}
+
+
+TEST(TSet, sample_prime_numbers) {
+  int n, m, k;
+  n = 30;
+  TSet s(n + 1);
+  // заполнение множества
+  for (m = 2; m <= n; m++)
+    s.InsElem(m);
+  // проверка до sqrt(n) и удаление кратных
+  for (m = 2; m * m <= n; m++)
+    // если м в s, удаление кратных
+      if (s.IsMember(m))
+        for (k = 2 * m; k <= n; k += m)
+          if (s.IsMember(k))
+            s.DelElem(k);
+  // оставшиеся в s элементы - простые числа
+
+  TSet expected(31);
+  int primes[] = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29};
+
+  for (int i = 0; i < 10; i++)
+    expected.InsElem(primes[i]);
+
+  EXPECT_EQ(expected, s);
+}
