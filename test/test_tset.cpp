@@ -295,3 +295,58 @@ TEST(TSet, check_negation_operator)
 
   EXPECT_EQ(expSet, set1);
 }
+
+TEST(TSet, throws_when_insert_element_out_of_range)
+{
+  TSet set(5);
+
+  ASSERT_ANY_THROW(set.InsElem(5));
+  ASSERT_ANY_THROW(set.InsElem(-1));
+}
+
+TEST(TSet, can_delete_element_using_minus_operator)
+{
+  const int size = 5;
+  TSet set(size), updatedSet(size);
+  set.InsElem(1);
+  set.InsElem(3);
+  updatedSet = set - 3;
+
+  EXPECT_EQ(0, updatedSet.IsMember(3));
+  EXPECT_NE(0, updatedSet.IsMember(1));
+  EXPECT_NE(0, set.IsMember(3));
+}
+
+TEST(TSet, negation_of_empty_set_contains_all_elements)
+{
+  const int size = 6;
+  TSet set(size), negSet(size);
+  negSet = ~set;
+
+  for (int i = 0; i < size; i++)
+    EXPECT_NE(0, negSet.IsMember(i));
+}
+
+TEST(TSet, can_chain_union_operations_on_three_sets)
+{
+  const int size = 6;
+  TSet set1(size), set2(size), set3(size), expSet(size);
+  // set1 = {0, 1}
+  set1.InsElem(0);
+  set1.InsElem(1);
+  // set2 = {1, 3}
+  set2.InsElem(1);
+  set2.InsElem(3);
+  // set3 = {4, 5}
+  set3.InsElem(4);
+  set3.InsElem(5);
+
+  // expSet = {0, 1, 3, 4, 5}
+  expSet.InsElem(0);
+  expSet.InsElem(1);
+  expSet.InsElem(3);
+  expSet.InsElem(4);
+  expSet.InsElem(5);
+
+  EXPECT_EQ(expSet, set1 + set2 + set3);
+}
