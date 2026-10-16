@@ -309,3 +309,38 @@ TEST(TBitField, bitfields_with_different_bits_are_not_equal)
 
   EXPECT_NE(bf1, bf2);
 }
+
+TEST(TBitField, my_own_double_clear_bit)
+{
+    TBitField bf(10);
+    bf.SetBit(3);
+    bf.ClrBit(3);
+    bf.ClrBit(3);
+    EXPECT_EQ(0, bf.GetBit(3));
+}
+
+TEST(TBitField, my_own_three_or_operator_in_one_line)
+{
+    const int size = 5;
+    TBitField bf1(size), bf2(size), bf3(size);
+    bf1.SetBit(0);
+    bf2.SetBit(1);
+    bf3.SetBit(2);
+
+    TBitField res = bf1 | bf2 | bf3;
+
+    EXPECT_EQ(1, res.GetBit(0));
+    EXPECT_EQ(1, res.GetBit(1));
+    EXPECT_EQ(1, res.GetBit(2));
+    EXPECT_EQ(0, res.GetBit(3));
+    EXPECT_EQ(0, res.GetBit(4));
+}
+
+TEST(TBitField, my_own_sum_of_odd_numbers)
+{
+    int sum = 1 + 3 + 5 + 7 + 9;
+    EXPECT_EQ(25, sum);   // 5^2
+
+    sum = 1 + 3 + 5 + 7 + 9 + 11;
+    EXPECT_EQ(36, sum);   // 6^2
+}
