@@ -309,3 +309,66 @@ TEST(TBitField, bitfields_with_different_bits_are_not_equal)
 
   EXPECT_NE(bf1, bf2);
 }
+
+TEST(TBitField, copied_bitfield_is_independent_of_original)
+{
+  TBitField bf1(10);
+  bf1.SetBit(5);
+
+  TBitField bf2(bf1);
+  EXPECT_EQ(bf1, bf2);
+
+  bf2.ClrBit(5);
+  EXPECT_NE(bf1, bf2);
+  EXPECT_NE(0, bf1.GetBit(5));
+}
+
+TEST(TBitField, can_set_last_bit_but_not_the_one_after_it)
+{
+  TBitField bf(10);
+
+  ASSERT_NO_THROW(bf.SetBit(9));
+  EXPECT_NE(0, bf.GetBit(9));
+  ASSERT_ANY_THROW(bf.SetBit(10));
+}
+
+TEST(TBitField, double_inversion_returns_original_bitfield)
+{
+  const int size = 38;
+  TBitField bf(size);
+  bf.SetBit(0);
+  bf.SetBit(17);
+  bf.SetBit(37);
+
+  EXPECT_EQ(bf, ~~bf);
+}
+
+TEST(TBitField, double_clear_bit_leaves_it_zero)
+{
+  TBitField bf(10);
+  bf.SetBit(4);
+
+  bf.ClrBit(4);
+  bf.ClrBit(4);
+
+  EXPECT_EQ(0, bf.GetBit(4));
+}
+
+TEST(TBitField, can_chain_or_operations_on_three_bitfields)
+{
+  const int size = 6;
+  TBitField bf1(size), bf2(size), bf3(size), expBf(size);
+  // bf1 = 100000
+  bf1.SetBit(0);
+  // bf2 = 001000
+  bf2.SetBit(2);
+  // bf3 = 000001
+  bf3.SetBit(5);
+
+  // expBf = 101001
+  expBf.SetBit(0);
+  expBf.SetBit(2);
+  expBf.SetBit(5);
+
+  EXPECT_EQ(expBf, bf1 | bf2 | bf3);
+}
