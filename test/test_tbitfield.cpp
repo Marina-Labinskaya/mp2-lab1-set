@@ -309,3 +309,39 @@ TEST(TBitField, bitfields_with_different_bits_are_not_equal)
 
   EXPECT_NE(bf1, bf2);
 }
+// My tests
+TEST(TBitField, double_clear_bit) {
+    TBitField bf(10);
+    bf.SetBit(5);
+    EXPECT_EQ(bf.GetBit(5), 1);
+    bf.ClrBit(5);
+    EXPECT_EQ(bf.GetBit(5), 0);
+    bf.ClrBit(5); // повторная очистка
+    EXPECT_EQ(bf.GetBit(5), 0);
+}
+
+TEST(TBitField, triple_or_operation) {
+    TBitField bf1(8), bf2(8), bf3(8);
+    bf1.SetBit(0);
+    bf2.SetBit(3);
+    bf3.SetBit(7);
+
+    TBitField result = bf1 | bf2 | bf3;
+
+    EXPECT_EQ(result.GetBit(0), 1);
+    EXPECT_EQ(result.GetBit(3), 1);
+    EXPECT_EQ(result.GetBit(7), 1);
+    EXPECT_EQ(result.GetBit(1), 0);
+    EXPECT_EQ(result.GetBit(2), 0);
+    EXPECT_EQ(result.GetBit(4), 0);
+}
+
+TEST(TBitField, set_failbit_on_bad_input)
+{
+  TBitField bf(4);
+  std::istringstream istr("10x1");
+
+  istr >> bf;
+
+  EXPECT_TRUE(istr.fail());
+}

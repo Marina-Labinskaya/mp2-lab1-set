@@ -295,3 +295,36 @@ TEST(TSet, check_negation_operator)
 
   EXPECT_EQ(expSet, set1);
 }
+
+TEST(TSet, triple_union_operation) {
+    TSet s1(10), s2(10), s3(10);
+    s1.InsElem(1);
+    s2.InsElem(5);
+    s3.InsElem(9);
+
+    TSet result = s1 + s2 + s3;
+
+    EXPECT_TRUE(result.IsMember(1));
+    EXPECT_TRUE(result.IsMember(5));
+    EXPECT_TRUE(result.IsMember(9));
+    EXPECT_FALSE(result.IsMember(2));
+    EXPECT_FALSE(result.IsMember(7));
+}
+
+TEST(TSet, can_read_and_write_set)
+{
+  const int size = 6;
+  TSet set(size), expSet(size);
+  expSet.InsElem(1);
+  expSet.InsElem(3);
+  expSet.InsElem(5);
+
+  std::istringstream istr("{1, 3, 5}");
+  istr >> set;
+  ASSERT_FALSE(istr.fail());
+  EXPECT_EQ(expSet, set);
+
+  std::ostringstream ostr;
+  ostr << set;
+  EXPECT_EQ("{1, 3, 5}", ostr.str());
+}
