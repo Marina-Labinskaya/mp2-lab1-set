@@ -1,0 +1,3 @@
+C:/Users/sasha/mp2-lab1-set/include/cmake-build-debug/CMakeFiles/include.dir
+C:/Users/sasha/mp2-lab1-set/include/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/sasha/mp2-lab1-set/include/cmake-build-debug/CMakeFiles/rebuild_cache.dir
