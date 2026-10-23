@@ -1,297 +1,179 @@
-#include "tset.h"
-
 #include <gtest.h>
+#include "tset.h"
+#include <stdexcept>
+#include <sstream>
 
-TEST(TSet, can_get_max_power_set)
-{
-  const int size = 5;
-  TSet set(size);
-
-  EXPECT_EQ(size, set.GetMaxPower());
+TEST(TSetTest, can_create_set_with_positive_max_power) {
+TSet s(20);
+EXPECT_EQ(s.GetMaxPower(), 20);
 }
 
-TEST(TSet, can_insert_non_existing_element)
-{
-  const int size = 5, k = 3;
-  TSet set(size);
-  set.InsElem(k);
-
-  EXPECT_NE(set.IsMember(k), 0);
+TEST(TSetTest, throws_when_create_set_with_negative_or_zero_max_power) {
+EXPECT_THROW(TSet s(-5), std::invalid_argument);
+EXPECT_THROW(TSet s(0), std::invalid_argument);
 }
 
-TEST(TSet, can_insert_existing_element)
-{
-  const int size = 5;
-  const int k = 3;
-  TSet set(size);
-  set.InsElem(k);
-  set.InsElem(k);
+TEST(TSetTest, can_copy_set) {
+TSet s1(15);
+s1.InsElem(7);
+TSet s2(s1);
 
-  EXPECT_NE(set.IsMember(k), 0);
+EXPECT_EQ(s1, s2);
+s2.InsElem(3);
+EXPECT_NE(s1, s2);
 }
 
-TEST(TSet, can_delete_non_existing_element)
-{
-  const int size = 5, k = 3;
-  TSet set(size);
-  set.DelElem(k);
+TEST(TSetTest, can_convert_between_tset_and_tbitfield) {
+TBitField bf(12);
+bf.SetBit(4);
+bf.SetBit(11);
 
-  EXPECT_EQ(set.IsMember(k), 0);
+TSet s(bf);
+EXPECT_EQ(s.GetMaxPower(), 12);
+EXPECT_EQ(s.IsMember(4), 1);
+EXPECT_EQ(s.IsMember(11), 1);
+
+TBitField bf_back = static_cast<TBitField>(s);
+EXPECT_EQ(bf, bf_back);
 }
 
-TEST(TSet, can_delete_existing_element)
-{
-  const int size = 5, k = 3;
-  TSet set(size);
+TEST(TSetTest, can_insert_check_and_delete_elements_at_boundaries) {
+TSet s(40);
+s.InsElem(0);
+s.InsElem(39);
 
-  set.InsElem(k);
-  EXPECT_GT(set.IsMember(k), 0);
+EXPECT_EQ(s.IsMember(0), 1);
+EXPECT_EQ(s.IsMember(39), 1);
+EXPECT_EQ(s.IsMember(20), 0);
 
-  set.DelElem(k);
-  EXPECT_EQ(set.IsMember(k), 0);
+s.DelElem(0);
+EXPECT_EQ(s.IsMember(0), 0);
 }
 
-TEST(TSet, compare_two_sets_of_non_equal_sizes)
-{
-  const int size1 = 4, size2 = 6;
-  TSet set1(size1), set2(size2);
-
-  EXPECT_EQ(1, set1 != set2);
+TEST(TSetTest, throws_when_insert_delete_or_check_out_of_bounds) {
+TSet s(10);
+EXPECT_THROW(s.InsElem(-1), std::out_of_range);
+EXPECT_THROW(s.InsElem(10), std::out_of_range);
+EXPECT_THROW(s.DelElem(-1), std::out_of_range);
+EXPECT_THROW(s.DelElem(10), std::out_of_range);
+EXPECT_THROW(s.IsMember(-1), std::out_of_range);
+EXPECT_THROW(s.IsMember(10), std::out_of_range);
 }
 
-TEST(TSet, compare_two_equal_sets)
-{
-  const int size = 4;
-  TSet set1(size), set2(size);
-  // set1 = set2 = {1, 3}
-  set1.InsElem(1);
-  set1.InsElem(3);
-  set2.InsElem(1);
-  set2.InsElem(3);
+TEST(TSetTest, can_assign_sets_of_different_sizes) {
+TSet s1(10), s2(30);
+s1.InsElem(5);
+s2 = s1;
 
-  EXPECT_EQ(set1, set2);
+EXPECT_EQ(s2.GetMaxPower(), 10);
+EXPECT_EQ(s1, s2);
 }
 
-TEST(TSet, compare_two_non_equal_sets)
-{
-  const int size = 4;
-  TSet set1(size), set2(size);
-  // set1 = {1, 3}
-  set1.InsElem(1);
-  set1.InsElem(3);
-  // set2 = {1, 2}
-  set2.InsElem(1);
-  set2.InsElem(2);
+TEST(TSetTest, compare_sets_of_equal_and_different_universes) {
+TSet s1(10), s2(10), s3(20);
+s1.InsElem(3);
+s2.InsElem(3);
+s3.InsElem(3);
 
-  EXPECT_EQ(1, set1 != set2);
+EXPECT_EQ(s1 == s2, 1);
+EXPECT_EQ(s1 != s2, 0);
+EXPECT_EQ(s1 == s3, 0);
+EXPECT_EQ(s1 != s3, 1);
 }
 
-TEST(TSet, can_assign_set_of_equal_size)
-{
-  const int size = 4;
-  TSet set1(size), set2(size);
-  // set1 = {1, 3}
-  set1.InsElem(1);
-  set1.InsElem(3);
-  set2 = set1;
+TEST(TSetTest, operator_plus_and_minus_element_do_not_modify_original_set) {
+TSet s(10);
+TSet s_plus = s + 4;
+EXPECT_EQ(s.IsMember(4), 0);
+EXPECT_EQ(s_plus.IsMember(4), 1);
 
-  EXPECT_EQ(set1, set2);
+TSet s_minus = s_plus - 4;
+EXPECT_EQ(s_plus.IsMember(4), 1);
+EXPECT_EQ(s_minus.IsMember(4), 0);
 }
 
-TEST(TSet, can_assign_set_of_greater_size)
-{
-  const int size1 = 4, size2 = 6;
-  TSet set1(size1), set2(size2);
-  // set1 = {1, 3}
-  set1.InsElem(1);
-  set1.InsElem(3);
-  set2 = set1;
-
-  EXPECT_EQ(set1, set2);
+TEST(TSetTest, operator_plus_and_minus_element_throw_out_of_bounds) {
+TSet s(10);
+EXPECT_THROW(s + 10, std::out_of_range);
+EXPECT_THROW(s + (-1), std::out_of_range);
+EXPECT_THROW(s - 10, std::out_of_range);
+EXPECT_THROW(s - (-1), std::out_of_range);
 }
 
-TEST(TSet, can_assign_set_of_less_size)
-{
-  const int size1 = 6, size2 = 4;
-  TSet set1(size1), set2(size2);
-  // set1 = {1, 3, 5}
-  set1.InsElem(1);
-  set1.InsElem(3);
-  set1.InsElem(5);
-  set2 = set1;
+TEST(TSetTest, can_union_two_sets_from_same_universe) {
+TSet s1(15), s2(15);
+s1.InsElem(2);
+s2.InsElem(12);
+TSet s3 = s1 + s2;
 
-  EXPECT_EQ(set1, set2);
+EXPECT_EQ(s3.GetMaxPower(), 15);
+EXPECT_EQ(s3.IsMember(2), 1);
+EXPECT_EQ(s3.IsMember(12), 1);
+EXPECT_EQ(s3.IsMember(5), 0);
 }
 
-TEST(TSet, can_insert_non_existing_element_using_plus_operator)
-{
-  const int size = 4;
-  const int k = 3;
-  TSet set(size), updatedSet(size);
-  set.InsElem(0);
-  set.InsElem(2);
-  updatedSet = set + k;
-
-  EXPECT_NE(0, updatedSet.IsMember(k));
+TEST(TSetTest, throws_when_union_sets_from_different_universes) {
+TSet s1(10), s2(15);
+EXPECT_THROW(s1 + s2, std::invalid_argument);
 }
 
-TEST(TSet, throws_when_insert_non_existing_element_out_of_range_using_plus_operator)
-{
-  const int size = 4;
-  const int k = 6;
-  TSet set(size), updatedSet(size);
-  set.InsElem(0);
-  set.InsElem(2);
+TEST(TSetTest, can_intersect_two_sets_from_same_universe) {
+TSet s1(15), s2(15);
+s1.InsElem(2);
+s1.InsElem(7);
+s2.InsElem(7);
+s2.InsElem(12);
 
-  ASSERT_ANY_THROW(updatedSet = set + k);
+TSet s3 = s1 * s2;
+EXPECT_EQ(s3.IsMember(7), 1);
+EXPECT_EQ(s3.IsMember(2), 0);
+EXPECT_EQ(s3.IsMember(12), 0);
 }
 
-TEST(TSet, can_insert_existing_element_using_plus_operator)
-{
-  const int size = 4;
-  const int k = 3;
-  TSet set(size), updatedSet(size);
-  set.InsElem(0);
-  set.InsElem(k);
-  updatedSet = set + k;
-
-  EXPECT_NE(0, set.IsMember(k));
+TEST(TSetTest, throws_when_intersect_sets_from_different_universes) {
+TSet s1(10), s2(15);
+EXPECT_THROW(s1 * s2, std::invalid_argument);
 }
 
-TEST(TSet, check_size_of_the_combination_of_two_sets_of_equal_size)
-{
-  const int size = 5;
-  TSet set1(size), set2(size), set3(size);
-  // set1 = {1, 2, 4}
-  set1.InsElem(1);
-  set1.InsElem(2);
-  set1.InsElem(4);
-  // set2 = {0, 1, 2}
-  set2.InsElem(0);
-  set2.InsElem(1);
-  set2.InsElem(2);
-  set3 = set1 + set2;
+TEST(TSetTest, can_complement_set_with_large_power) {
+TSet s(35);
+s.InsElem(0);
+s.InsElem(34);
+TSet inv = ~s;
 
-  EXPECT_EQ(size, set3.GetMaxPower());
+EXPECT_EQ(inv.IsMember(0), 0);
+EXPECT_EQ(inv.IsMember(34), 0);
+EXPECT_EQ(inv.IsMember(15), 1);
+EXPECT_EQ(~inv, s);
 }
 
-TEST(TSet, can_combine_two_sets_of_equal_size)
-{
-  const int size = 5;
-  TSet set1(size), set2(size), set3(size), expSet(size);
-  // set1 = {1, 2, 4}
-  set1.InsElem(1);
-  set1.InsElem(2);
-  set1.InsElem(4);
-  // set2 = {0, 1, 2}
-  set2.InsElem(0);
-  set2.InsElem(1);
-  set2.InsElem(2);
-  set3 = set1 + set2;
-  // expSet = {0, 1, 2, 4}
-  expSet.InsElem(0);
-  expSet.InsElem(1);
-  expSet.InsElem(2);
-  expSet.InsElem(4);
+TEST(TSetTest, stream_output_and_input_roundtrip_with_multidigit_elements) {
+TSet s1(20);
+s1.InsElem(1);
+s1.InsElem(2);
+s1.InsElem(12);
+s1.InsElem(19);
 
-  EXPECT_EQ(expSet, set3);
+std::stringstream ss;
+ss << s1;
+
+TSet s2(20);
+s2.InsElem(5);
+ss >> s2;
+
+EXPECT_EQ(s1, s2);
+EXPECT_EQ(s2.IsMember(5), 0);
 }
 
-TEST(TSet, check_size_changes_of_the_combination_of_two_sets_of_non_equal_size)
-{
-  const int size1 = 5, size2 = 7;
-  TSet set1(size1), set2(size2), set3(size1);
-  // set1 = {1, 2, 4}
-  set1.InsElem(1);
-  set1.InsElem(2);
-  set1.InsElem(4);
-  // set2 = {0, 1, 2}
-  set2.InsElem(0);
-  set2.InsElem(1);
-  set2.InsElem(2);
-  set3 = set1 + set2;
+TEST(TSetTest, stream_input_handles_empty_set_and_overwrites_previous_state) {
+TSet s(10);
+s.InsElem(3);
+s.InsElem(8);
 
-  EXPECT_EQ(size2, set3.GetMaxPower());
+std::istringstream iss("{ }");
+iss >> s;
+
+for (int i = 0; i < 10; i++) {
+EXPECT_EQ(s.IsMember(i), 0);
 }
-
-TEST(TSet, can_combine_two_sets_of_non_equal_size)
-{
-  const int size1 = 5, size2 = 7;
-  TSet set1(size1), set2(size2), set3(size1), expSet(size2);
-  // set1 = {1, 2, 4}
-  set1.InsElem(1);
-  set1.InsElem(2);
-  set1.InsElem(4);
-  // set2 = {0, 1, 2, 6}
-  set2.InsElem(0);
-  set2.InsElem(1);
-  set2.InsElem(2);
-  set2.InsElem(6);
-  set3 = set1 + set2;
-  // expSet = {0, 1, 2, 4, 6}
-  expSet.InsElem(0);
-  expSet.InsElem(1);
-  expSet.InsElem(2);
-  expSet.InsElem(4);
-  expSet.InsElem(6);
-
-  EXPECT_EQ(expSet, set3);
-}
-
-TEST(TSet, can_intersect_two_sets_of_equal_size)
-{
-  const int size = 5;
-  TSet set1(size), set2(size), set3(size), expSet(size);
-  // set1 = {1, 2, 4}
-  set1.InsElem(1);
-  set1.InsElem(2);
-  set1.InsElem(4);
-  // set2 = {0, 1, 2}
-  set2.InsElem(0);
-  set2.InsElem(1);
-  set2.InsElem(2);
-  set3 = set1 * set2;
-  // expSet = {1, 2}
-  expSet.InsElem(1);
-  expSet.InsElem(2);
-
-  EXPECT_EQ(expSet, set3);
-}
-
-TEST(TSet, can_intersect_two_sets_of_non_equal_size)
-{
-  const int size1 = 5, size2 = 7;
-  TSet set1(size1), set2(size2), set3(size1), expSet(size2);
-  // set1 = {1, 2, 4}
-  set1.InsElem(1);
-  set1.InsElem(2);
-  set1.InsElem(4);
-  // set2 = {0, 1, 2, 4, 6}
-  set2.InsElem(0);
-  set2.InsElem(1);
-  set2.InsElem(2);
-  set2.InsElem(4);
-  set2.InsElem(6);
-  set3 = set1 * set2;
-  // expSet = {1, 2, 4}
-  expSet.InsElem(1);
-  expSet.InsElem(2);
-  expSet.InsElem(4);
-
-  EXPECT_EQ(expSet, set3);
-}
-
-TEST(TSet, check_negation_operator)
-{
-  const int size = 4;
-  TSet set(size), set1(size), expSet(size);
-  // set1 = {1, 3}
-  set.InsElem(1);
-  set.InsElem(3);
-  set1 = ~set;
-  // expSet = {0, 2}
-  expSet.InsElem(0);
-  expSet.InsElem(2);
-
-  EXPECT_EQ(expSet, set1);
 }
