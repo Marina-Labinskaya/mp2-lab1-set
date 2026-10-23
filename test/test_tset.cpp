@@ -295,3 +295,51 @@ TEST(TSet, check_negation_operator)
 
   EXPECT_EQ(expSet, set1);
 }
+
+
+// LALALA, PUPUPU
+
+TEST(TSet, can_use_minus_operator_to_remove_element)
+{
+  // Проверка оператора вычитания элемента из множества
+  const int size = 10;
+  TSet set(size), updatedSet(size);
+  set.InsElem(3);
+  set.InsElem(7);
+
+  updatedSet = set - 3; // удаляем тройку
+
+  EXPECT_EQ(0, updatedSet.IsMember(3));
+  EXPECT_NE(0, updatedSet.IsMember(7));
+}
+
+TEST(TSet, chained_operations_work_correctly)
+{
+  // Проверка цепочки: объединение двух множеств, а затем пересечение с третьим
+  const int size = 5;
+  TSet set1(size), set2(size), set3(size), expSet(size);
+
+  // set1 = {1, 2}
+  set1.InsElem(1); set1.InsElem(2);
+  // set2 = {2, 3}
+  set2.InsElem(2); set2.InsElem(3);
+  // set3 = {3, 4}
+  set3.InsElem(3); set3.InsElem(4);
+
+  // (set1 + set2) даст {1, 2, 3}
+  // {1, 2, 3} * set3 даст {3}
+  TSet result = (set1 + set2) * set3;
+
+  expSet.InsElem(3);
+  EXPECT_EQ(expSet, result);
+}
+
+TEST(TSet, throws_when_inserting_element_out_of_max_power)
+{
+  // Проверяем, что множество правильно пробрасывает ошибку битового поля
+  const int size = 5;
+  TSet set(size);
+
+  // Максимально допустимый элемент: size - 1 (то есть 4). Попытка добавить 5 должна вызвать throw
+  ASSERT_ANY_THROW(set.InsElem(5));
+}

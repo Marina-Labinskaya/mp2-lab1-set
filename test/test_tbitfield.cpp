@@ -309,3 +309,43 @@ TEST(TBitField, bitfields_with_different_bits_are_not_equal)
 
   EXPECT_NE(bf1, bf2);
 }
+
+
+// BEBEBE, TRALYALYA
+
+TEST(TBitField, copy_constructor_creates_deep_copy)
+{
+  // Проверка того, что при копировании память выделяется заново (глубокая копия)
+  TBitField bf1(10);
+  bf1.SetBit(5);
+  
+  TBitField bf2(bf1); // копируем
+  EXPECT_EQ(1, bf2.GetBit(5)); // бит скопировался
+  
+  // Меняем оригинал - копия измениться не должна!
+  bf1.ClrBit(5);
+  EXPECT_EQ(0, bf1.GetBit(5));
+  EXPECT_EQ(1, bf2.GetBit(5));
+}
+
+TEST(TBitField, can_set_and_get_last_valid_bit)
+{
+  // Проверка работы с последним возможным индексом поля
+  const int size = 32;
+  TBitField bf(size);
+  
+  ASSERT_NO_THROW(bf.SetBit(size - 1));
+  EXPECT_NE(0, bf.GetBit(size - 1));
+}
+
+TEST(TBitField, assignment_operator_creates_deep_copy)
+{
+  // Проверка глубокой копии при операторе =
+  TBitField bf1(15), bf2(15);
+  bf1.SetBit(7);
+  
+  bf2 = bf1;
+  bf1.ClrBit(7); // меняем исходное поле
+  
+  EXPECT_NE(0, bf2.GetBit(7)); // во втором поле бит должен остаться 1
+}
