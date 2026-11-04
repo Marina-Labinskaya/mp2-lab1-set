@@ -590,15 +590,11 @@
 // Determines whether Google Test can use tr1/tuple.  You can define
 // this macro to 0 to prevent Google Test from using tuple (any
 // feature depending on tuple with be disabled in this mode).
+// Current MSVC no longer provides std::tr1::tuple, and this bundled
+// Google Test cannot inject that namespace back into std.
 #ifndef GTEST_HAS_TR1_TUPLE
-# if GTEST_OS_LINUX_ANDROID && defined(_STLPORT_MAJOR)
-// STLport, provided with the Android NDK, has neither <tr1/tuple> or <tuple>.
-#  define GTEST_HAS_TR1_TUPLE 0
-# else
-// The user didn't tell us not to do it, so we assume it's OK.
-#  define GTEST_HAS_TR1_TUPLE 1
-# endif
-#endif  // GTEST_HAS_TR1_TUPLE
+# define GTEST_HAS_TR1_TUPLE 0
+#endif
 
 // Determines whether Google Test's own tr1 tuple implementation
 // should be used.
