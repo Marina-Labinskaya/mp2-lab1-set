@@ -1,4 +1,6 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
+
+add_definitions(-DGTEST_LANG_CXX11=1)
 
 set(PROJECT_NAME set)
 project(${PROJECT_NAME})
